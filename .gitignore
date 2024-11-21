@@ -152,6 +152,7 @@ dmypy.json
 *.pyc
 __pycache__
 .pptx_search.db
+pptx_search.db
 
 # pytype static type analyzer
 .pytype/
