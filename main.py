@@ -13,21 +13,35 @@ now = datetime.now()
 current_time = now.strftime('%d.%m.%Y %H:%M:%S')
 
 def main() -> None:
-    # All seven return values from the get_presentation function
-    presentation_name, presentation_path, slide_number, hidden_slides, presentation_created, presentation_modified, all_text = get_presentation()
-    # Insert the extracted words into the database
-    write_to_database(word_list=all_text, presentation_name=presentation_name, presentation_path=presentation_path)
-    # Insert the presentation metadata into the database
-    save_pptx_to_database(name=presentation_name, path=presentation_path, created=presentation_created, modified=presentation_modified, slides=slide_number, hidden=hidden_slides)
+    directory_path: str = filedialog.askdirectory()
+    found_presentations = find_pptx_files(directory_path)
+    for presentation in found_presentations:
+        # All seven return values from the get_presentation function put into variables
+        presentation_name, presentation_path, slide_number, hidden_slides, presentation_created, presentation_modified, all_text = get_presentation(presentation)
+        # Insert the extracted words into the database
+        write_to_database(word_list=all_text, presentation_name=presentation_name, presentation_path=presentation_path)
+        # Insert the presentation metadata into the database
+        save_pptx_to_database(name=presentation_name, path=presentation_path, created=presentation_created, modified=presentation_modified, slides=slide_number, hidden=hidden_slides)
     
     search_query: str = input("Enter your search query: ")
     query_database(search_query)
 
 
-def get_presentation():
+def find_pptx_files(directory) -> list[str]:
+    # This might be a good place to set up some filters, for damaged presentations for example ("._" in front of the filename)
+    # Also the check for already existing presentations in the database (in combination with "last modified") should happen here. Skip those existing and not modified to save some time.
+    # Bug: not all presentations get recognized (16 out of 30 testpresentations made it into the presentation table)
+    file_paths = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".pptx"):
+                file_path = os.path.join(root, file)
+                file_paths.append(file_path)
+    return file_paths
+
+
+def get_presentation(presentation_selection):
     """This is where the file gets opened and every necessary information extracted"""
-    presentation_selection: str = filedialog.askopenfilename(
-            filetypes=[("PowerPoint Files", "*.pptx")])
     
     if presentation_selection:
         # To avoid issues with opening / closing files the presentation is only really opened here
@@ -170,11 +184,9 @@ def query_database(query) -> None:
 
     conn.close()
 
-# TO-DO: Save all presentations in a table with name, path and last modified time
-
 # TO-DO: Compare all presentations from the presentations table to the ones on the systems -> update if necessary
 
-# TO-DO: Make sure files are closed properly
+# TO-DO: Add word filters and exceptions
 
 # TO-DO: GUI
 
