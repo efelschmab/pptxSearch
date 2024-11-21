@@ -148,6 +148,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Ignore compiled Python files
+*.pyc
+__pycache__
+
 # pytype static type analyzer
 .pytype/
 
