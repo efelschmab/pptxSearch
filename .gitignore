@@ -151,6 +151,7 @@ dmypy.json
 # Ignore compiled Python files
 *.pyc
 __pycache__
+.pptx_search.db
 
 # pytype static type analyzer
 .pytype/
