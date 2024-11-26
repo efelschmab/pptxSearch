@@ -5,10 +5,11 @@ from datetime import datetime
 now = datetime.now()
 current_time = now.strftime('%d.%m.%Y %H:%M:%S')
 
+database: str = "pptx_search.db"
+
 def check_for_existing(file, time) -> int:
     """Returns 0 if not found in database, otherwise 1"""
     # Database connection
-    database: str = "pptx_search.db"
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -25,7 +26,6 @@ def check_for_existing(file, time) -> int:
 
 def create_all_presentations_table() -> None:
     # Database connection
-    database: str = "pptx_search.db"
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -38,7 +38,6 @@ def create_all_presentations_table() -> None:
 
 def write_to_database(word_list, presentation_name, presentation_path) -> None:
     # Database connection
-    database: str = "pptx_search.db"
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -70,10 +69,10 @@ def write_to_database(word_list, presentation_name, presentation_path) -> None:
 
 def save_pptx_to_database(name, path, created, modified, slides, hidden) -> None:
     # Database connection
-    database: str = "pptx_search.db"
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
+    
     sql_insert_presentation: str = f"INSERT INTO 'all_presentations' (presentation_name, presentation_path, created, last_modified, last_indexed, total_slides, hidden_slides) VALUES ('{name}', '{path}', '{created}', '{modified}', '{current_time}', '{slides}', '{hidden}')"
     cursor.execute(sql_insert_presentation)
     
@@ -83,7 +82,6 @@ def save_pptx_to_database(name, path, created, modified, slides, hidden) -> None
 
 def query_database(query) -> list:
     # Database connection
-    database: str = "pptx_search.db"
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -96,7 +94,7 @@ def query_database(query) -> list:
 
     for table_name in table_names:
         result_word: str = table_name[0]
-        # initiate a list for each word to go into the full list of search results
+        # Initiate a list for each word to go into the full list of search results
         word_list: list[str] = []
         word_list.append(result_word)
 
@@ -105,9 +103,29 @@ def query_database(query) -> list:
 
         results = cursor.fetchall()
         for row in results:
-            # add the individual search results (path, name and slide number)
+            # Add the individual search results (path, name and slide number)
             word_list.append(row)
         fetch_list.append(word_list)
 
     conn.close()
     return fetch_list
+
+def get_database_content() -> str:
+    # Database connection
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    presentation_number = cursor.execute("SELECT COUNT(*) FROM all_presentations").fetchone()[0]
+
+    string: str = ""
+    
+    if presentation_number > 0:        
+        slide_number = cursor.execute("SELECT SUM(total_slides) FROM all_presentations").fetchone()[0]
+        hidden_slides = cursor.execute("SELECT SUM(hidden_slides) FROM all_presentations").fetchone()[0]
+        string = f"Database entries found. {presentation_number} presentations with a total of {slide_number} slides, {hidden_slides} of which are hidden."
+
+    else:
+        string = "No database entries found."
+
+    conn.close()
+    return string

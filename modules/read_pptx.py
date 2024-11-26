@@ -56,7 +56,7 @@ def get_hidden_slides(presentation) -> int:
 def get_all_text(presentation) -> list[str]:
     '''Strip the (text) content of the presentation of all clutter (e.g. empty spaces) and prepare it to be indexed'''
     text_list: list = []   
-    # starting the slide counter at 0 because that's what the pptx index function needs
+    # Starting the slide counter at 0 because that's what the pptx index function needs
     slide_number: int = 0
     for slide in presentation.slides:
         for shape in slide.shapes:
@@ -64,12 +64,12 @@ def get_all_text(presentation) -> list[str]:
                 continue
             for paragraph in shape.text_frame.paragraphs:
                 for text in paragraph.runs:
-                    # split to individual words
+                    # Split to individual words
                     split_text = text.text.split(" ")
                     for split in split_text:
-                        # filtering out all non-alphabetical or numerical characters
+                        # Filtering out all non-alphabetical or numerical characters
                         word: str = ''.join(char for char in split if char.isalnum())
-                        # only words that are not empty strings, have at least 3 characters and are not fully numerical
+                        # Only words that are not empty strings, have at least 3 characters and are not fully numerical
                         if word != "" and len(word) > 2 and any(char.isalpha() for char in word):
                             text_position: dict = {}
                             text_position["word"] = word

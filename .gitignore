@@ -169,3 +169,5 @@ cython_debug/
 pptx_search.db
 imagetest.py
 /test
+/test_data
+search_results.pptx
