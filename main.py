@@ -1,25 +1,27 @@
 from customtkinter import filedialog
-import  customtkinter as ctk
+import customtkinter as ctk
 import os
 from modules import *
+import sqlite3
 
-# Keywords to filter specific filenames. "._" for example, as that indicates a corrupted file
+# Filenames to exclude from indexing (e.g. "._" = potentially corrupted file)
 file_filter_list: list[str] = [
     "._",
     "~$",
 ]
 
-# Keywords to filter specific directory names that should always be skipped
+# Directories to skip
 directory_filter_list: list[str] = []
 
-# Initialize UI object from UI class
-ui_obj = ui.gui()
+ui_obj = ui.GUI()
+
 
 def main() -> None:
+    
     database_logic.create_all_presentations_table()
     
     window = ctk.CTk()
-    window.geometry("600x270")
+    window.geometry("600x230")
     window.title("pptxSearch Tool")    
     
     window.columnconfigure(0, minsize=100)
@@ -27,12 +29,14 @@ def main() -> None:
 
     top_frame = ui_obj.container(master_frame=window, row=0)
     create_db_button = ui_obj.button(master_frame=top_frame, column=0, row=0, button_text="Create Database", button_command=create_database)
-    db_info_label = ui_obj.label(master_frame=top_frame, column=1, text="")
+    db_info_label = ui_obj.db_label(master_frame=top_frame, column=1, text="")
     
-    bottom_frame = ui_obj.container(master_frame=window, row=1)
-    search_button = ui_obj.button(master_frame=bottom_frame, column=0, row=1, button_text="Search", button_command=search)
-    query_entry = ui_obj.entry(master_frame=bottom_frame, column=1, row= 1)  
-    
+    mid_frame = ui_obj.container(master_frame=window, row=1)
+    search_button = ui_obj.button(master_frame=mid_frame, column=0, row=1, button_text="Search", button_command=search)
+    query_entry = ui_obj.entry(master_frame=mid_frame, column=1, row= 1)
+
+    log_label = ui_obj.loglabel(master_frame=window, column=0, text="")
+
     # Check database content after initialization of the UI
     ui_obj.change_label_text(text=database_logic.get_database_content())
 
@@ -40,23 +44,35 @@ def main() -> None:
 
 
 def search() -> None:
+    
     search_query: str = ui_obj.fetch_query_field()
-    query_result = database_logic.query_database(search_query)
+    
+    try:
+        query_result = database_logic.query_database(search_query)
+    except sqlite3.OperationalError:
+        ui_obj.change_log_label_text(text="No query result or invalid search query.")
+        return None
+    
+    if query_result == []:
+        ui_obj.change_log_label_text(text="No query result.")
+        return None
+
     write_pptx.create_presentation(query_result)
     os.startfile("search_results.pptx") 
 
 
 def create_database() -> None:
+    
     directory_path: str = filedialog.askdirectory()
     found_presentations = find_pptx_files(directory_path)
+    ui_obj.change_log_label_text(text="Processing found presentations")
     for presentation in found_presentations:
-        # All seven return values from the get_presentation function put into variables
         presentation_name, presentation_path, slide_number, hidden_slides, presentation_created, presentation_modified, all_text = read_pptx.get_presentation(presentation)
         if presentation_name:
-            # Insert the extracted words into the database
+            # Processing search results -> database
             database_logic.write_to_database(word_list=all_text, presentation_name=presentation_name, presentation_path=presentation_path)
-            # Insert the presentation metadata into the database
             database_logic.save_pptx_to_database(name=presentation_name, path=presentation_path, created=presentation_created, modified=presentation_modified, slides=slide_number, hidden=hidden_slides)
+    ui_obj.change_log_label_text(text="")
     ui_obj.change_label_text(text=database_logic.get_database_content())
 
 
@@ -85,9 +101,6 @@ def find_pptx_files(directory) -> list[str]:
     print(f"{file_paths = }")
     return file_paths
 
-# TO-DO: GUI
-
-# TO-DO: Search refinement (what if no query? What if query shorter than 1 character?)
 
 if __name__ == '__main__':
     main()

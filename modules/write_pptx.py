@@ -19,11 +19,9 @@ def create_presentation(found_list):
         results: list[str] = found_word[1:]
 
         """Create a slide"""
-        # Pick slide layout
         slide_layout = prs.slide_layouts[0]
-        # Add a slide
         slide = prs.slides.add_slide(slide_layout)
-        # Add and fill title placeholder
+        
         title = slide.shapes.title
         title.text = word # type: ignore
 

@@ -9,7 +9,6 @@ database: str = "pptx_search.db"
 
 def check_for_existing(file, time) -> int:
     """Returns 0 if not found in database, otherwise 1"""
-    # Database connection
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -25,7 +24,7 @@ def check_for_existing(file, time) -> int:
 
 
 def create_all_presentations_table() -> None:
-    # Database connection
+    
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -37,7 +36,7 @@ def create_all_presentations_table() -> None:
 
 
 def write_to_database(word_list, presentation_name, presentation_path) -> None:
-    # Database connection
+    
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -68,10 +67,9 @@ def write_to_database(word_list, presentation_name, presentation_path) -> None:
 
 
 def save_pptx_to_database(name, path, created, modified, slides, hidden) -> None:
-    # Database connection
+
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
-
     
     sql_insert_presentation: str = f"INSERT INTO 'all_presentations' (presentation_name, presentation_path, created, last_modified, last_indexed, total_slides, hidden_slides) VALUES ('{name}', '{path}', '{created}', '{modified}', '{current_time}', '{slides}', '{hidden}')"
     cursor.execute(sql_insert_presentation)
@@ -81,7 +79,7 @@ def save_pptx_to_database(name, path, created, modified, slides, hidden) -> None
 
 
 def query_database(query) -> list:
-    # Database connection
+
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -111,7 +109,7 @@ def query_database(query) -> list:
     return fetch_list
 
 def get_database_content() -> str:
-    # Database connection
+
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 

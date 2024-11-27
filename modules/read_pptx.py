@@ -4,14 +4,13 @@ import os
 from datetime import datetime
 
 def get_presentation(presentation_selection):
-    """This is where the file gets opened and all necessary information extracted"""    
+    """This function is the only place where the presentations actually get opened"""    
     if presentation_selection:
         try:
-            # To avoid issues with opening / closing files the presentation is only really opened here
+            
             with open(presentation_selection, 'rb') as presentation_file:
                 presentation_file = Presentation(presentation_selection)
                 
-                # Gathering all metadata
                 presentation_name: str = os.path.split(presentation_selection)[1]
                 presentation_path: str = os.path.split(presentation_selection)[0]
 
@@ -35,7 +34,7 @@ def get_presentation(presentation_selection):
     
 
 def get_time(selection: int, file: str) -> str:
-    """Takes an file path and an integer input. 0 = creation time, 1 = 'last modified' time"""
+    """0 = creation time, 1 = 'last modified' time"""
     if selection == 1:
         time = os.path.getmtime(file)
     elif selection == 0:
@@ -54,7 +53,7 @@ def get_hidden_slides(presentation) -> int:
     return hidden_slide_counter
 
 def get_all_text(presentation) -> list[str]:
-    '''Strip the (text) content of the presentation of all clutter (e.g. empty spaces) and prepare it to be indexed'''
+    '''Extract al (text) content & remove all clutter'''
     text_list: list = []   
     # Starting the slide counter at 0 because that's what the pptx index function needs
     slide_number: int = 0
