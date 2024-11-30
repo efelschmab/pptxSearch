@@ -4,6 +4,8 @@ from customtkinter import filedialog
 import customtkinter as ctk
 from modules import *
 
+# command for bulding the executable: pyinstaller --onefile --noconsole --add-data "template.pptx;./modules" main.py
+
 # Filter list for potentially damaged files
 file_filter_list: list[str] = [
     "._",

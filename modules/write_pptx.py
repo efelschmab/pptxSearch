@@ -3,7 +3,10 @@ from pptx import Presentation
 
 
 current_dir: str = os.path.dirname(__file__)
-template_path: str = os.path.join(current_dir, "template.pptx")
+
+template_path = os.path.join(
+    current_dir, "template.pptx")
+
 FILENAME: str = "search_results.pptx"
 
 
