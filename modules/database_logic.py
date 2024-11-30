@@ -14,9 +14,8 @@ def check_for_existing(file: str, time: str) -> int:
     conn = sqlite3.connect(database, detect_types=sqlite3.PARSE_DECLTYPES)
     cursor = conn.cursor()
 
-    sql_request = f"SELECT * FROM all_presentations WHERE presentation_name = '{
-        file}' AND last_modified = '{time}'"
-    cursor.execute(sql_request)
+    sql_request: str = f"SELECT * FROM all_presentations WHERE presentation_name = ? AND last_modified = ?"
+    cursor.execute(sql_request, (file, time))
     result = cursor.fetchone()
 
     if not result:

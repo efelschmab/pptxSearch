@@ -33,6 +33,11 @@ def get_presentation(presentation_selection):
                   presentation_selection}")
             return None, None, None, None, None, None, None
 
+        except Exception as e:
+            # Sometimes presentations or parts of them are broken or corrupted. Those should be skipped.
+            print(f"An error occurred: {str(e)}")
+            return None, None, None, None, None, None, None
+
     else:
         print("Could not open file")
         return None, None, None, None, None, None, None
